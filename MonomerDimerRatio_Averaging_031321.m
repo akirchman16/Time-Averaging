@@ -14,8 +14,11 @@ w = 1;  %cooperativity parameter
 L_Total = 2;    %total concentration of RAD51
 k_on = 1;   %kinetic rate constants
 k_off = 1;
-Ratio_Values = [0];   %Percentage of solution which is monomers (0 to 1)
-AverageIterations = 3;    %number of iterations at each ratio value
+Ratio_Values = [0 1];   %Percentage of solution which is monomers (0 to 1)
+AverageIterations = 5;    %number of iterations at each ratio value
+
+UncoveredLength = 0.34; %length of a DNA nt without RAD51 bound to it (according to van der Heijden paper) - nm
+CoveredLength = 0.51;   %length of a DNA nt where RAD51 is bound - nm
 
 Ratios_Prep = ones(1,AverageIterations);  
 Percent_Monomer = [];
@@ -33,6 +36,7 @@ minIterations = 1000;
 %Memory Allocation
 EventFractions = zeros(numel(Percent_Monomer),7);
 FracCover = zeros(numel(Percent_Monomer),minIterations);
+DNA_Lengths = zeros(numel(Percent_Monomer),minIterations);
 t = zeros(numel(Percent_Monomer),minIterations);
 Max_Time = zeros(1,numel(Percent_Monomer));
 Equilibrium_Coverage = zeros(1,numel(Percent_Monomer));
@@ -197,6 +201,8 @@ for Ratio = Percent_Monomer
 
         FracCover(Loops,Events+1) = sum(DNA)/N;
         t(Loops,Events+1) = t(Loops,Events)+dt(Events);
+        
+        DNA_Length(Loops,Events+1) = (numel(find(DNA==1))*CoveredLength)+(numel(find(DNA==0))*UncoveredLength); %calculated length of DNA strand based on lengths given previously
 
     %     Testing for Equilibrium
         if Events > minIterations && Equilibrium == 0
@@ -222,18 +228,25 @@ for Ratio = Percent_Monomer
     Max_Time(Loops) = max(t(Loops,:));
     
     Equilibrium_Coverage(Loops) = mean(FracCoverStates);
-%     disp(['(Ratio = ', num2str(Ratio), ') - Equilibrium Saturation = ', num2str(Equilibrium_Coverage(Loops))]);
-    
-%     figure(1);
-%     hold on;
-%     scatter(t(Loops,:),FracCover(Loops,:),1,Colors(Ratio_Values == Ratio,:),'filled','HandleVisibility','off');
-%     xlabel('Time, t');
-%     ylabel('Fractional Coverage');
-%     xlim([0 1.25]);
-%     ylim([0 1]);
-% %     yline(Equilibrium_Coverage(Loops),'k',['\rho = ', num2str(Percent_Monomer(Loops))]);
-%     title('Saturation of DNA Lattice');
-%     box on;
+   
+    figure(1);
+    subplot(2,1,1);
+    hold on;
+    scatter(t(Loops,:),FracCover(Loops,:),1,Colors(Ratio_Values == Ratio,:),'filled','HandleVisibility','off');
+    ylabel('Fractional Coverage');
+    xlim([0 1.25]);
+    ylim([0 1]);
+%     yline(Equilibrium_Coverage(Loops),'k',['\rho = ', num2str(Percent_Monomer(Loops))]);
+    title('Saturation of DNA Lattice');
+    box on;
+    subplot(2,1,2);
+    hold on;
+    scatter(t(Loops,:),DNA_Length(Loops,:),1,Colors(Ratio_Values == Ratio,:),'filled','HandleVisibility','off');
+    ylabel('Length (nm)');
+    xlim([0 1.25]);
+    ylim([N*UncoveredLength N*CoveredLength]);
+    title('Length of DNA Strand');
+    box on;
     
     if flag == 1
         break
@@ -293,13 +306,14 @@ for b = Percent_Monomer_Avg
     end
     
     figure(1);
+    subplot(2,1,1);
     hold on;
     scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k');
     xlabel('Time, t');
     ylabel('Fractional Coverage');
     xlim([0 AllTime_MaxTime]);
     ylim([0 1]);
-    title(['Avg. Saturation of DNA Lattice (n = ', num2str(AverageIterations)]);
+    title(['Avg. Saturation of DNA Lattice (n = ', num2str(AverageIterations),')']);
     box on;
 end
 
@@ -309,6 +323,6 @@ for c = 1:length(Percent_Monomer_Avg)
     Legend{c} = ['\rho = ', num2str(Percent_Monomer_Avg(c))];
 end
 figure(1);
-hleg = legend(Legend,'location','southeast');
+hleg = legend(Legend,'location','bestoutside');
 htitle = get(hleg,'Title');
 set(htitle,'String','Monomer:Dimer Ratio (\rho)');
