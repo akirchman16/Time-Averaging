@@ -14,8 +14,8 @@ w = 1;  %cooperativity parameter
 L_Total = 2;    %total concentration of RAD51
 k_on = 1;   %kinetic rate constants
 k_off = 1;
-Ratio_Values = [0 1];   %Percentage of solution which is monomers (0 to 1)
-AverageIterations = 5;    %number of iterations at each ratio value
+Ratio_Values = [0.5];   %Percentage of solution which is monomers (0 to 1)
+AverageIterations = 10;    %number of iterations at each ratio value
 
 UncoveredLength = 0.34; %length of a DNA nt without RAD51 bound to it (according to van der Heijden paper) - nm
 CoveredLength = 0.51;   %length of a DNA nt where RAD51 is bound - nm
@@ -241,10 +241,10 @@ for Ratio = Percent_Monomer
     box on;
     subplot(2,1,2);
     hold on;
-    scatter(t(Loops,:),DNA_Length(Loops,:),1,Colors(Ratio_Values == Ratio,:),'filled','HandleVisibility','off');
-    ylabel('Length (nm)');
+    scatter(t(Loops,:),DNA_Length(Loops,:)/1000,1,Colors(Ratio_Values == Ratio,:),'filled','HandleVisibility','off');
+    ylabel('Length (\mum)');
     xlim([0 1.25]);
-    ylim([N*UncoveredLength N*CoveredLength]);
+    ylim([N*UncoveredLength/1000 N*CoveredLength/1000]);
     title('Length of DNA Strand');
     box on;
     
@@ -281,14 +281,18 @@ for b = Percent_Monomer_Avg
     Zeros = zeros(1,length(LoopNumbers));
     TimeMatrix(1:length(LoopNumbers),:) = t(LoopNumbers,:); %time profiles for this given ratio
     FracCoverMatrix(1:length(LoopNumbers),:) = FracCover(LoopNumbers,:);    %saturation profiles for given ratio
+    DNA_LengthMatrix(1:length(LoopNumbers),:) = DNA_Length(LoopNumbers,:);  %growth profiles for the given ratio
     TimeArray = reshape(TimeMatrix,[1,numel(TimeMatrix)]);
     FracCoverArray = reshape(FracCoverMatrix,[1,numel(FracCoverMatrix)]);
+    StrandLengthArray = reshape(DNA_LengthMatrix,[1,numel(DNA_LengthMatrix)]);
 %     There should only be 3 zeros at the beginning of the Time and
 %     FracCover Arrays
     TimeArray(TimeArray == 0) = []; %removes all zeros
     TimeArray = [Zeros,TimeArray];  %re-adds corresponding zeros for first step of each loop
     FracCoverArray(FracCoverArray == 0) = [];   %removes all zeros
     FracCoverArray = [Zeros,FracCoverArray];    %re-adds corresponding zeros to zero time value
+    StrandLengthArray(StrandLengthArray == 0) = []; %removes all zeros
+    StrandLengthArray = [Zeros,StrandLengthArray];  %re-adds corresponding zeros to to zero time value
 %     Create Time Bins for each value
     MaximumTime = max(TimeArray);  %maximum time
     TimeBinLength = MaximumTime/500;    %width of time bins
@@ -298,22 +302,32 @@ for b = Percent_Monomer_Avg
     PosInBin = 0;
     AvgTimeInBin = zeros(1,length(TimeBins)-1);
     AvgFracCoverInBin = zeros(1,length(TimeBins)-1);
+    AvgStrandLengthInBin = zeros(1,length(TimeBins)-1);
     
     for d = 1:length(TimeBins)-1
         PosInBin = find(TimeArray <= TimeBins(d+1) & TimeArray > TimeBins(d));    %positions of values that are within a given time bin
         AvgTimeInBin(d) = sum(TimeArray(PosInBin))/numel(TimeArray(PosInBin));
         AvgFracCoverInBin(d) = sum(FracCoverArray(PosInBin))/numel(FracCoverArray(PosInBin));
+        AvgStrandLengthInBin(d) = sum(StrandLengthArray(PosInBin)/numel(PosInBin));
     end
     
     figure(1);
     subplot(2,1,1);
     hold on;
-    scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k');
-    xlabel('Time, t');
+    scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
     ylabel('Fractional Coverage');
     xlim([0 AllTime_MaxTime]);
     ylim([0 1]);
     title(['Avg. Saturation of DNA Lattice (n = ', num2str(AverageIterations),')']);
+    box on;
+    subplot(2,1,2);
+    hold on;
+    scatter(AvgTimeInBin,AvgStrandLengthInBin/1000,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
+    xlabel('Time, t');
+    ylabel('Length (\mum)');
+    xlim([0 AllTime_MaxTime]);
+    ylim([N*UncoveredLength/1000 N*CoveredLength/1000]);
+    title('Length of DNA Strand');
     box on;
 end
 
@@ -323,6 +337,7 @@ for c = 1:length(Percent_Monomer_Avg)
     Legend{c} = ['\rho = ', num2str(Percent_Monomer_Avg(c))];
 end
 figure(1);
-hleg = legend(Legend,'location','bestoutside');
+subplot(2,1,1);
+hleg = legend(Legend,'location','southeast');
 htitle = get(hleg,'Title');
 set(htitle,'String','Monomer:Dimer Ratio (\rho)');
