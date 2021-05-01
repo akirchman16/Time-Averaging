@@ -310,9 +310,9 @@ for b = Percent_Monomer_Avg
         AvgFracCoverInBin(d) = sum(FracCoverArray(PosInBin))/numel(FracCoverArray(PosInBin));
         AvgStrandLengthInBin(d) = sum(StrandLengthArray(PosInBin)/numel(PosInBin));
     end
-    
-    figure(1);
-    subplot(2,1,1);
+
+    figure(2);
+%     subplot(2,1,1);
     hold on;
     scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
     ylabel('Fractional Coverage');
@@ -320,15 +320,15 @@ for b = Percent_Monomer_Avg
     ylim([0 1]);
     title(['Avg. Saturation of DNA Lattice (n = ', num2str(AverageIterations),')']);
     box on;
-    subplot(2,1,2);
-    hold on;
-    scatter(AvgTimeInBin,AvgStrandLengthInBin/1000,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
+%     subplot(2,1,2);
+%     hold on;
+%     scatter(AvgTimeInBin,AvgStrandLengthInBin/1000,10,Colors(Percent_Monomer_Avg == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
     xlabel('Time, t');
-    ylabel('Length (\mum)');
-    xlim([0 AllTime_MaxTime]);
-    ylim([N*UncoveredLength/1000 N*CoveredLength/1000]);
-    title('Length of DNA Strand');
-    box on;
+%     ylabel('Length (\mum)');
+%     xlim([0 AllTime_MaxTime]);
+%     ylim([N*UncoveredLength/1000 N*CoveredLength/1000]);
+%     title('Length of DNA Strand');
+%     box on;
 end
 
 Total_Events = zeros(1,length(Percent_Monomer_Avg));
