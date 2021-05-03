@@ -2,16 +2,16 @@ clearvars;
 close all;
 
 % This code creates "average" curves for multiple values of the
-% cooperatitivy parameter, w. Input different values for Coop_Values and
-% the model will run 10 iterations of the simulation for each w value and
+% kinetic rate constant for binding, k_on. Input different values for kon_Values and
+% the model will run 10 iterations of the simulation for each k_on value and
 % then create averages for each value. Included in this model is the ratio
 % of monomers to dimers.
 
 N = 8660;   %length of DNA lattice
 n = 3;  %length of a monomer
-Coop_Values = [1,10,100];  %cooperativity parameter (maximum of 100 - for color scale so not super important)
+w = 1;  %cooperativity parameter
 L_Total = 2;    %total concentration of RAD51
-k_on = 1;   %kinetic rate constants
+kon_Values = [0.1,1,10];   %kinetic rate constants
 k_off = 1;
 Ratio = 1;   %Percentage of solution which is monomers (0 to 1)
 AverageIterations = 10;    %number of iterations at each ratio value
@@ -19,31 +19,31 @@ AverageIterations = 10;    %number of iterations at each ratio value
 UncoveredLength = 0.34; %length of a DNA nt without RAD51 bound to it (according to van der Heijden paper) - nm
 CoveredLength = 0.51;   %length of a DNA nt where RAD51 is bound - nm
 
-Coop_Prep = ones(1,AverageIterations);  %sorts all values for cooperativity from smallest to largest
-Cooperativities = [];
-for f = 1:length(Coop_Values)
-    Cooperativities = sort([Cooperativities,Coop_Values(f)*Coop_Prep]);
+kon_Prep = ones(1,AverageIterations);  %sorts all values for cooperativity from smallest to largest
+kineticRateConstants = [];
+for f = 1:length(kon_Values)
+    kineticRateConstants = sort([kineticRateConstants,kon_Values(f)*kon_Prep]);
 end
 
-Colors = zeros(numel(Coop_Values),3);   %selects color to plot average curves in for each cooperativity value
-for z = 1:numel(Coop_Values)
-    Colors(z,:) = [1-(Coop_Values(z)/100), 0, Coop_Values(z)/100]; %color scaled from w = 0 to w = 100
+Colors = zeros(numel(kon_Values),3);   %selects color to plot average curves in for each cooperativity value
+for z = 1:numel(kon_Values)
+    Colors(z,:) = [1-(kon_Values(z)/100), 0, kon_Values(z)/100]; %color scaled from w = 0 to w = 100
 end
 
 minIterations = 1000;
 
 %Memory Allocation
-EventFractions = zeros(numel(Cooperativities),7);
-FracCover = zeros(numel(Cooperativities),minIterations);
-DNA_Lengths = zeros(numel(Cooperativities),minIterations);
-t = zeros(numel(Cooperativities),minIterations);
-Max_Time = zeros(1,numel(Cooperativities));
-Equilibrium_Coverage = zeros(1,numel(Cooperativities));
-L_Monomer = zeros(1,numel(Cooperativities));
-L_Dimer = zeros(1,numel(Cooperativities));
+EventFractions = zeros(numel(kineticRateConstants),7);
+FracCover = zeros(numel(kineticRateConstants),minIterations);
+DNA_Lengths = zeros(numel(kineticRateConstants),minIterations);
+t = zeros(numel(kineticRateConstants),minIterations);
+Max_Time = zeros(1,numel(kineticRateConstants));
+Equilibrium_Coverage = zeros(1,numel(kineticRateConstants));
+L_Monomer = zeros(1,numel(kineticRateConstants));
+L_Dimer = zeros(1,numel(kineticRateConstants));
 
 Loops = 0;
-for w = Cooperativities
+for k_on = kineticRateConstants
     Loops = Loops+1;
     
     L_Monomer(Loops) = Ratio*L_Total;        %Concentration of monomer RAD51
@@ -231,7 +231,7 @@ for w = Cooperativities
     figure(1);
 %     subplot(2,1,1);
     hold on;
-    scatter(t(Loops,:),FracCover(Loops,:),1,Colors(Coop_Values == w,:),'filled','HandleVisibility','off');
+    scatter(t(Loops,:),FracCover(Loops,:),1,Colors(kon_Values == k_on,:),'filled','HandleVisibility','off');
     ylabel('Fractional Coverage');
     xlim([0 1.25]);
     ylim([0 1]);
@@ -240,7 +240,7 @@ for w = Cooperativities
     box on;
 %     subplot(2,1,2);
 %     hold on;
-%     scatter(t(Loops,:),DNA_Length(Loops,:)/1000,1,Colors(Coop_Values == w,:),'filled','HandleVisibility','off');
+%     scatter(t(Loops,:),DNA_Length(Loops,:)/1000,1,Colors(kon_Values == w,:),'filled','HandleVisibility','off');
 %     ylabel('Length (\mum)');
     xlabel('Time, t');
 %     xlim([0 1.25]);
@@ -266,8 +266,8 @@ AllTime_MaxTime = max(Max_Time);
 %     Mean_Equilibrium_D = sum(SortedEquilibrium(2,:))/numel(find(Percent_Monomer == 6));  %Avg Equilibrium values for dimer only
 %     yline(Mean_Equilibrium_D,'--k', ['\rho = 1 (', num2str(round(Mean_Equilibrium_D,3)), ')'],'LineWidth',1);
 % end
-Cooperativities = unique(Coop_Values);
-for b = Cooperativities
+kineticRateConstants = unique(kon_Values);
+for b = kineticRateConstants
     clear TimeMatrix;
     clear FracCoverMatrix;
     clear TimeArray;
@@ -276,7 +276,7 @@ for b = Cooperativities
     clear TimeBinLength;
     clear TimeBins;
     
-    LoopNumbers = find(Cooperativities == b);   %loop numbers where ratio is equal to given b value
+    LoopNumbers = find(kineticRateConstants == b);   %loop numbers where ratio is equal to given b value
     Zeros = zeros(1,length(LoopNumbers));
     TimeMatrix(1:length(LoopNumbers),:) = t(LoopNumbers,:); %time profiles for this given ratio
     FracCoverMatrix(1:length(LoopNumbers),:) = FracCover(LoopNumbers,:);    %saturation profiles for given ratio
@@ -313,7 +313,7 @@ for b = Cooperativities
     figure(2);
 %     subplot(2,1,1);
     hold on;
-    scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(Cooperativities == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
+    scatter(AvgTimeInBin,AvgFracCoverInBin,10,Colors(kineticRateConstants == b,:),'filled','MarkerEdgeColor','k','MarkerEdgeAlpha',0.5);
     ylabel('Fractional Coverage');
     xlim([0 AllTime_MaxTime]);
     ylim([0 1]);
@@ -330,13 +330,13 @@ for b = Cooperativities
 %     box on;
 end
 
-Total_Events = zeros(1,length(Cooperativities));
-Legend = cell(length(Cooperativities),1);
-for c = 1:length(Cooperativities)
-    Legend{c} = ['\omega = ', num2str(Cooperativities(c))];
+Total_Events = zeros(1,length(kineticRateConstants));
+Legend = cell(length(kineticRateConstants),1);
+for c = 1:length(kineticRateConstants)
+    Legend{c} = ['k_o_n = ', num2str(kineticRateConstants(c))];
 end
 figure(2);
 % subplot(2,1,1);
 hleg = legend(Legend,'location','southeast');
 htitle = get(hleg,'Title');
-set(htitle,'String','Cooperativity Values, \omega');
+set(htitle,'String','Kinetic Rate Constant for Binding, k_o_n');
