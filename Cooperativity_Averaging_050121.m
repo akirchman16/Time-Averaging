@@ -10,7 +10,7 @@ close all;
 
 N = 8660;   %length of DNA lattice
 n = 3;  %length of a monomer
-Coop_Values = [0.1,1,10];  %cooperativity parameter (maximum of 100 - for color scale so not super important)
+Coop_Values = [1,10,100];  %cooperativity parameter (maximum of 100 - for color scale so not super important)
 L_Total = 2;    %total concentration of RAD51
 k_on = 1;   %kinetic rate constants
 k_off = 1;
@@ -230,7 +230,7 @@ for w = Cooperativities
     Equilibrium_Coverage(Loops) = mean(FracCoverStates);
    
     figure(1);
-    subplot(2,1,1);
+%     subplot(2,1,1);
     hold on;
     scatter(t(Loops,:),FracCover(Loops,:),1,Colors(Coop_Values == w,:),'filled','HandleVisibility','off');
     ylabel('Fractional Coverage');
@@ -267,8 +267,8 @@ AllTime_MaxTime = max(Max_Time);
 %     Mean_Equilibrium_D = sum(SortedEquilibrium(2,:))/numel(find(Percent_Monomer == 6));  %Avg Equilibrium values for dimer only
 %     yline(Mean_Equilibrium_D,'--k', ['\rho = 1 (', num2str(round(Mean_Equilibrium_D,3)), ')'],'LineWidth',1);
 % end
-
-for b = Coop_Values
+Cooperativities = unique(Coop_Values);
+for b = Cooperativities
     clear TimeMatrix;
     clear FracCoverMatrix;
     clear TimeArray;
@@ -336,8 +336,8 @@ Legend = cell(length(Cooperativities),1);
 for c = 1:length(Cooperativities)
     Legend{c} = ['\omega = ', num2str(Cooperativities(c))];
 end
-figure(1);
-subplot(2,1,1);
+figure(2);
+% subplot(2,1,1);
 hleg = legend(Legend,'location','southeast');
 htitle = get(hleg,'Title');
 set(htitle,'String','Cooperativity Values, \omega');
