@@ -12,7 +12,7 @@ n = 3;  %length of a monomer
 w = 1;  %cooperativity parameter
 L_Total = 2;    %total concentration of RAD51
 k_on = 1;   %kinetic rate constants
-koff_Values = [0.1,1,10];
+koff_Values = [0.1,1,10];   %various values for k_off
 Ratio = 1;   %Percentage of solution which is monomers (0 to 1)
 AverageIterations = 5;    %number of iterations at each ratio value
 
@@ -27,7 +27,7 @@ end
 
 Colors = zeros(numel(koff_Values),3);   %selects color to plot average curves in for each cooperativity value
 for z = 1:numel(koff_Values)
-    Colors(z,:) = [1-(koff_Values(z)/100), 0, koff_Values(z)/100]; %color scaled from w = 0 to w = 100
+    Colors(z,:) = [rand,rand,rand]; %color scaled from w = 0 to w = 100
 end
 
 minIterations = 1000;
@@ -41,10 +41,12 @@ Max_Time = zeros(1,numel(kineticRateConstants));
 Equilibrium_Coverage = zeros(1,numel(kineticRateConstants));
 L_Monomer = zeros(1,numel(kineticRateConstants));
 L_Dimer = zeros(1,numel(kineticRateConstants));
+Variable_List = zeros(1,AverageIterations*numel(kineticRateConstants));
 
 Loops = 0;
 for k_off = kineticRateConstants
     Loops = Loops+1;
+    Variable_List(Loops) = k_off;   %lists respective variable for each loop
     
     L_Monomer(Loops) = Ratio*L_Total;        %Concentration of monomer RAD51
     L_Dimer(Loops) = (1-Ratio)*L_Total;    %Concentration of dimer RAD51
@@ -225,8 +227,6 @@ for k_off = kineticRateConstants
 
     EventFractions(Loops,:) = [numel(find(j==1)),numel(find(j==2)),numel(find(j==3)),numel(find(j==4)),numel(find(j==5)),numel(find(j==6)),numel(find(j==7))]./Events;
     Max_Time(Loops) = max(t(Loops,:));
-    
-    Equilibrium_Coverage(Loops) = mean(FracCoverStates);
    
     figure(1);
 %     subplot(2,1,1);
@@ -235,7 +235,6 @@ for k_off = kineticRateConstants
     ylabel('Fractional Coverage');
     xlim([0 1.25]);
     ylim([0 1]);
-%     yline(Equilibrium_Coverage(Loops),'k',['\rho = ', num2str(Percent_Monomer(Loops))]);
     title('Saturation of DNA Lattice');
     box on;
 %     subplot(2,1,2);
@@ -255,17 +254,6 @@ end
 
 AllTime_MaxTime = max(Max_Time);
 
-% SortedEquilibrium = zeros(2,length(Percent_Monomer));
-% if ~isempty(find(Percent_Monomer == 0, 1))
-%     SortedEquilibrium(1,1:length(find(Percent_Monomer == 0))) = Equilibrium_Coverage(Percent_Monomer == 0);    %Equilibrium values for monomer only
-%     Mean_Equilibrium_M = sum(SortedEquilibrium(1,:))/numel(find(Percent_Monomer == 0));  %Avg Equilibrium values for monomer only
-%     yline(Mean_Equilibrium_M,'--k', ['\rho = 0 (', num2str(round(Mean_Equilibrium_M,3)), ')'],'LineWidth',1);
-% end
-% if ~isempty(find(Percent_Monomer == 1,1))
-%     SortedEquilibrium(2,1:length(find(Percent_Monomer == 1))) = Equilibrium_Coverage(Percent_Monomer == 1);    %Equilibrium values for dimer only
-%     Mean_Equilibrium_D = sum(SortedEquilibrium(2,:))/numel(find(Percent_Monomer == 6));  %Avg Equilibrium values for dimer only
-%     yline(Mean_Equilibrium_D,'--k', ['\rho = 1 (', num2str(round(Mean_Equilibrium_D,3)), ')'],'LineWidth',1);
-% end
 kineticRateConstants = unique(koff_Values);
 for b = kineticRateConstants
     clear TimeMatrix;
@@ -276,7 +264,7 @@ for b = kineticRateConstants
     clear TimeBinLength;
     clear TimeBins;
     
-    LoopNumbers = find(kineticRateConstants == b);   %loop numbers where ratio is equal to given b value
+    LoopNumbers = find(Variable_List == b);   %loop numbers where ratio is equal to given b value
     Zeros = zeros(1,length(LoopNumbers));
     TimeMatrix(1:length(LoopNumbers),:) = t(LoopNumbers,:); %time profiles for this given ratio
     FracCoverMatrix(1:length(LoopNumbers),:) = FracCover(LoopNumbers,:);    %saturation profiles for given ratio
