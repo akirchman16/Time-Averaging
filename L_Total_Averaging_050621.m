@@ -10,11 +10,11 @@ close all;
 N = 8660;   %length of DNA lattice
 n = 3;  %length of a monomer
 w = 1;  %cooperativity parameter
-Conc_Values = [0.5,1,5];    %total concentration of RAD51
+Conc_Values = [0.1,1,10];    %total concentration of RAD51
 k_on = 1;   %kinetic rate constants
 k_off = 1;
 Ratio = 1;   %Percentage of solution which is monomers (0 to 1)
-AverageIterations = 5;    %number of iterations at each ratio value
+AverageIterations = 10;    %number of iterations at each ratio value
 
 UncoveredLength = 0.34; %length of a DNA nt without RAD51 bound to it (according to van der Heijden paper) - nm
 CoveredLength = 0.51;   %length of a DNA nt where RAD51 is bound - nm
