@@ -68,32 +68,8 @@ for Ratio = Percent_Monomer
     while max(t(Loops,:)) < 1.25
         Events = Events+1;    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        clear Left
-        clear Right
-        clear Gap_Size
-        clear Left_Available_M
-        clear Right_Available_M
-        clear Left_Available_D
-        clear Right_Available_D
-        clear Right_BindingSite_M
-        clear Right_BindingSite_D
-        clear Gaps_L2_M
-        clear Gaps_R2_M
-        clear Gaps_L2_D
-        clear Gaps_R2_D
-        clear Gap_Size2_M
-        clear Gap_Size2_D
-        clear Gap_SizeI_M
-        clear Gap_SizeI_D
-        clear Left_I_M
-        clear Left_I_D
-        clear Isolated_M
-        clear SinglyContiguous_M
-        clear DoublyContiguous_M
-        clear Isolated_D
-        clear SinglyContiguous_D
-        clear DoublyContiguous_D
+        searcH_vars = {'Left','Right','Gap_Size','Left_Available_M','Right_Available_M','Left_Available_D','Right_Available_D','Right_BindingSite_M','Right_BindingSite_D','Gaps_L2_M','Gaps_R2_M','Gaps_L2_D','Gaps_R2_D','Gap_Size2_M','Gap_Size2_D','Gap_SizeI_M','Gap_SizeI_D','Left_I_M','Left_I_D','Isolated_M','SinglyContiguous_M','Doubly_Contiguous_M','Isolated_D','SinglyContiguous_D','DoublyContiguous_D'};
+        clear searcH_vars;
 
         Left = find(diff([1 DNA 1]) == -1);
         Right = find(diff([1 DNA 1]) == 1)-1;
